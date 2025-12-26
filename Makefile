@@ -7,12 +7,13 @@ TARGET = build/app
 all: $(TARGET)
 
 $(TARGET): $(OBJ)
+	mkdir -p build
 	$(CC) $(OBJ) -o $(TARGET)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(OBJ) $(TARGET)
+	rm -f $(OBJ) $(TARGET)
 
 .PHONY: all clean
