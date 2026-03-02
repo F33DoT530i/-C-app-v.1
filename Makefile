@@ -1,19 +1,41 @@
-CC = gcc
+CC     = gcc
 CFLAGS = -Wall -Wextra -Iinclude
-SRC = src/main.c
-OBJ = $(SRC:.c=.o)
-TARGET = build/app
+
+# ---- library objects (shared between app and tests) ----
+LIB_SRC = src/credit.c src/card.c
+LIB_OBJ = $(LIB_SRC:.c=.o)
+
+# ---- main application ----
+APP_SRC = src/main.c
+APP_OBJ = $(APP_SRC:.c=.o)
+TARGET  = build/app
+
+# ---- test binaries ----
+TEST_CREDIT = build/test_credit
+TEST_CARD   = build/test_card
 
 all: $(TARGET)
 
-$(TARGET): $(OBJ)
+$(TARGET): $(LIB_OBJ) $(APP_OBJ)
 	mkdir -p build
-	$(CC) $(OBJ) -o $(TARGET)
+	$(CC) $(LIB_OBJ) $(APP_OBJ) -o $(TARGET)
+
+$(TEST_CREDIT): $(LIB_OBJ) tests/test_credit.c
+	mkdir -p build
+	$(CC) $(CFLAGS) $(LIB_OBJ) tests/test_credit.c -o $(TEST_CREDIT)
+
+$(TEST_CARD): $(LIB_OBJ) tests/test_card.c
+	mkdir -p build
+	$(CC) $(CFLAGS) $(LIB_OBJ) tests/test_card.c -o $(TEST_CARD)
+
+test: $(TEST_CREDIT) $(TEST_CARD)
+	./$(TEST_CREDIT)
+	./$(TEST_CARD)
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -f $(OBJ) $(TARGET)
+	rm -f $(LIB_OBJ) $(APP_OBJ) $(TARGET) $(TEST_CREDIT) $(TEST_CARD)
 
-.PHONY: all clean
+.PHONY: all test clean
